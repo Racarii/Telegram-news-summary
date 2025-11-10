@@ -1,0 +1,5 @@
+# Список каналов, по одному на строку
+# Пример: @channel_name
+@breakingmash
+https://t.me/vlresports
+https://t.me/lentachold

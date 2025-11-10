@@ -1,0 +1,12 @@
+# Игнорируем локальную конфигурацию и сессии
+.env
+telegram_summary_session.session
+*.session-journal
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.log
+
+# Виртуальные окружения
+.venv/
