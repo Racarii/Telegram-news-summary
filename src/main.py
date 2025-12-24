@@ -44,15 +44,23 @@ async def gather_channel_summaries(
 
         channel_label = tl_utils.get_display_name(entity) or getattr(entity, "username", None) or channel_spec
 
-        messages: List[CollectedMessage] = await fetch_channel_messages(
-            client, entity, channel_label, days_back
-        )
-        logger.info("Получено %d подходящих сообщений", len(messages))
+        try:
+            messages: List[CollectedMessage] = await fetch_channel_messages(
+                client, entity, channel_label, days_back
+            )
+            logger.info("Получено %d подходящих сообщений", len(messages))
 
-        request: SummaryRequest = build_summary_request(channel_label, messages)
-        summary_text = (await summarizer.summarize([request]))[0]
+            if not messages:
+                logger.warning("Канал %s не содержит сообщений за указанный период", channel_label)
+                continue
 
-        summaries.append((channel_label, summary_text))
+            request: SummaryRequest = build_summary_request(channel_label, messages)
+            summary_text = (await summarizer.summarize([request]))[0]
+
+            summaries.append((channel_label, summary_text))
+        except Exception as exc:
+            logger.error("Ошибка при обработке канала %s: %s", channel_label, exc, exc_info=True)
+            continue
 
     return summaries
 
@@ -143,14 +151,23 @@ async def main() -> None:
         overall_request = build_overview_request([summary for _, summary in channel_summaries])
         overall_summary = (await summarizer.summarize([overall_request]))[0]
 
+        # Небольшая задержка после закрытия Telethon клиента
+        await asyncio.sleep(1)
+
         overall_message = "*Недельный дайджест — общий обзор*\n\n" + overall_summary
-        for chunk in split_for_telegram(overall_message):
+        logger.info("Начинаю отправку общего обзора (длина: %d символов)", len(overall_message))
+        for idx, chunk in enumerate(split_for_telegram(overall_message), 1):
+            logger.info("Отправляю часть %d общего обзора (длина: %d символов)", idx, len(chunk))
             await publisher.send_markdown(config.telegram.report_channel_id, chunk)
+            await asyncio.sleep(0.5)  # Небольшая задержка между сообщениями
 
         for channel_label, summary in channel_summaries:
             message_text = f"*{channel_label}*\n{summary}"
-            for chunk in split_for_telegram(message_text):
+            logger.info("Начинаю отправку дайджеста для %s (длина: %d символов)", channel_label, len(message_text))
+            for idx, chunk in enumerate(split_for_telegram(message_text), 1):
+                logger.info("Отправляю часть %d для %s (длина: %d символов)", idx, channel_label, len(chunk))
                 await publisher.send_markdown(config.telegram.report_channel_id, chunk)
+                await asyncio.sleep(0.5)  # Небольшая задержка между сообщениями
 
         logger.info("Отчёт успешно отправлен")
 

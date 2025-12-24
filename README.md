@@ -42,6 +42,7 @@
 TELEGRAM_API_ID=ваш_api_id
 TELEGRAM_API_HASH=ваш_api_hash
 TELEGRAM_PHONE=+71234567890           # номер, который проходит авторизацию в Telethon (опционально)
+TELEGRAM_SESSION_NAME=telegram_summary_session  # имя файла сессии (можно оставить по умолчанию)
 TELEGRAM_BOT_TOKEN=ваш_bot_token
 REPORT_CHANNEL_ID=@summary_channel     # username или numeric ID канала для отчёта
 DEEPSEEK_API_KEY=ваш_deepseek_key
@@ -53,7 +54,11 @@ DAYS_BACK=7                            # глубина истории в дня
 > ⚠️ Не храните реальные ключи в репозитории — добавьте `.env` в `.gitignore`.
 
 ### Авторизация Telethon
-При первом запуске Telethon попросит код подтверждения и, возможно, пароль 2FA. Сессия будет сохранена в файл `telegram_summary_session.session` рядом с проектом.
+При первом запуске Telethon попросит код подтверждения и, возможно, пароль 2FA. Сессия будет сохранена в файл с именем из `TELEGRAM_SESSION_NAME` (по умолчанию `telegram_summary_session.session`) рядом с проектом.
+
+**Важно:** Если вы меняете аккаунт Telegram (новые `TELEGRAM_API_ID`/`TELEGRAM_API_HASH`/`TELEGRAM_PHONE`), нужно либо:
+- Удалить старый файл сессии (например, `telegram_summary_session.session`)
+- Или указать новое имя сессии через переменную `TELEGRAM_SESSION_NAME` в `.env`
 
 ## Список каналов
 - Откройте `channels.txt` и добавьте по одному каналу в строке (можно использовать `@username` или полную ссылку `https://t.me/...`).

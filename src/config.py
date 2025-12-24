@@ -74,6 +74,7 @@ def load_config() -> AppConfig:
         phone=os.getenv("TELEGRAM_PHONE"),
         bot_token=_require("TELEGRAM_BOT_TOKEN"),
         report_channel_id=_require("REPORT_CHANNEL_ID"),
+        session_name=os.getenv("TELEGRAM_SESSION_NAME", "telegram_summary_session"),
     )
 
     deepseek_config = DeepSeekConfig(
